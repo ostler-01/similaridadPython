@@ -1,0 +1,142 @@
+---
+title: "analisis"
+author: "oscar lazo"
+date: "2024-02-25"
+output:
+  html_document:
+    df_print: paged
+---
+```{r}
+library(readxl)
+library(dplyr)
+library(readr)
+library(psych)
+library(ggplot2)
+library(stargazer)
+library(lmtest)
+library(gridExtra)
+library(PerformanceAnalytics)
+library(car)
+library(corrplot)
+library(knitr)
+
+```
+## lectura de los datos
+
+```{r}
+data <- read.csv("RESULTADOSDENDROGRAMAS.csv", sep = ";", header = TRUE,stringsAsFactors = FALSE)
+attach(data)
+head(data)
+
+```
+
+```{r}
+str(data)
+```
+```{r}
+
+t.test(x=Porcentaje.de.grupos.similares , alternative = "greater", mu=0.9 , conf.level = 0.95)
+```
+#contraste
+```{r}
+library(tidyverse)
+```
+
+
+
+
+
+```{r}
+Porcentaje.de.ramas.similares<-as.integer(Porcentaje.de.ramas.similares)
+Porcentaje.de.grupos.similares<-as.integer(Porcentaje.de.grupos.similares)
+data<-data.frame(base,num.variables,Ramas.Rchic,Ramas.Pchic,Grupos..Rchic,Grupos.Pchic,Porcentaje.de.ramas.similares,Porcentaje.de.grupos.similares)
+data
+```
+
+```{r}
+
+t.test(x=Porcentaje.de.grupos.similares , alternative = "greater", mu=0.9 , conf.level = 0.95)
+```
+# analisis descriptivo
+
+```{r}
+resumen_psych <- describe(data)
+
+kable(print(resumen_psych))
+```
+
+```{r}
+A<-ggplot(data,aes(x=Ramas.Rchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(Ramas.Rchic),sd(Ramas.Rchic)),size=0.7)+
+labs(title=" Distribución de niveles dendrogramas Rchic ", y="Densidad",x="rchic")
+
+B<-ggplot(data,aes(x=Ramas.Pchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(Ramas.Pchic),sd(Ramas.Pchic)),size=0.7)+
+labs(title=" Distribución de niveles dendrogramas Pchic ", y="Densidad",x="Pchic")
+
+grid.arrange(A,B)
+
+
+```
+```{r}
+x1 <- Ramas.Rchic
+x2 <- Ramas.Pchic
+x <- c(x1, x2)
+ Grupo <- c(rep("RCHIC", length(Ramas.Rchic)), rep("PCHIC", length(Ramas.Pchic)))
+
+df <- data.frame(x, group = Grupo)
+
+ggplot(df)+
+  aes(x=x,fill=Grupo)+
+  geom_histogram(aes(y=..density..),bins=50,alpha=0.75,position="identity")+
+  geom_density(aes(linetype=Grupo,colour=Grupo),alpha=0)+
+  labs(title="",x="Representación de valores generados por Pchic y Rchic.",y="")+
+  theme_classic()
+```
+
+```{r}
+c<-ggplot(data,aes(x=Grupos..Rchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(Grupos..Rchic),sd(Grupos..Rchic)),size=0.7)+
+labs(title=" Distribución de  dendrogramas Rchic(grupos) ", y="Densidad",x="rchic")
+
+d<-ggplot(data,aes(x=Grupos.Pchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(Grupos.Pchic),sd(Grupos.Pchic)),size=0.7)+
+labs(title=" Distribución de dendrogramas Pchic(grupos) ", y="Densidad",x="Pchic")
+
+grid.arrange(c,d)
+```
+```{r}
+x1 <- Grupos..Rchic
+x2 <- Grupos.Pchic
+x <- c(x1, x2)
+ Grupo <- c(rep("RCHIC", length(Grupos..Rchic)), rep("PCHIC", length(Grupos.Pchic)))
+
+df <- data.frame(x, group = Grupo)
+
+ggplot(df)+
+  aes(x=x,fill=Grupo)+
+  geom_histogram(aes(y=..density..),bins=50,alpha=0.75,position="identity")+
+  geom_density(aes(linetype=Grupo,colour=Grupo),alpha=0)+
+  labs(title="",x="Representación de grupos generados por Pchic y Rchic.",y="")+
+  theme_classic()
+```
+## porcentajes
+```{r}
+library(ggplot2)
+a1<-ggplot(data, aes(Porcentaje.de.ramas.similares,base)) + geom_point()+geom_smooth(method=)
+a2<-ggplot(data, aes(Porcentaje.de.ramas.similares,num.variables)) + geom_point()+geom_smooth(method=)
+grid.arrange(a1,a2)
+```
+
+```{r}
+
+```
+
