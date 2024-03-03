@@ -1,0 +1,316 @@
+---
+title: "resultados rtesis"
+author: "oscar lazo"
+date: "2024-01-31"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#leer LIbrerias
+```{r,warning=FALSE}
+
+library(readxl)
+library(dplyr)
+library(readr)
+library(psych)
+library(ggplot2)
+library(stargazer)
+library(lmtest)
+library(gridExtra)
+library(PerformanceAnalytics)
+library(car)
+library(corrplot)
+library(ellipse)
+library(knitr)
+```
+
+#cargar datos
+
+
+```{r}
+
+data <- read.csv("data.csv", sep = ";", header = TRUE,stringsAsFactors = FALSE)
+attach(data)
+
+```
+
+```{r}
+
+# Mostrar las primeras filas del dataframe para verificar que se haya cargado correctamente
+head(data)
+
+str(data)
+total.de.observaciones<-as.integer(total.de.observaciones)
+filas.observaciones.<-as.integer(filas.observaciones.)
+Rchic.total.similaridad<-as.integer(Rchic.total.similaridad)
+Pchic.total.similaridad<-as.integer(Pchic.total.similaridad)
+Rchic.total.similaridad.6.<-as.integer(Rchic.total.similaridad.6.)
+Pchic.total.similaridad.6.<-as.integer(Pchic.total.similaridad.6.)
+
+```
+
+
+
+```{r}
+data<-data.frame(N.BASES,total.de.observaciones,filas.observaciones.,variables,
+        total.de.valores.en.la.matriz.de...similaridad,Rchic.total.similaridad,Pchic.total.similaridad,
+        cant..valores.no.similares,porcentaje.de.valores.similares.entre.2.matrices,
+        porcentaje.de.no.similaridad,nodospchic,nodosrchic,porcentaje.nodos.iguales,
+        Rchic.total.similaridad.6.,Pchic.total.similaridad.6.,porcentaje.de.valores.similares.6.)
+        
+                       
+```
+
+
+## describe
+
+```{r}
+library(ggplot2)
+
+ggplot(data = data, aes(x = porcentaje.de.valores.similares.entre.2.matrices, y = variables)) + 
+  geom_point(color = 'slateblue', size = 2, alpha = 0.6) +
+  geom_smooth(color = 'red') + 
+  xlab('Pocentaje de Valores Similares entre Pchic y Rchic ') + 
+  ylab('Variables') +
+  ggtitle('Num.variables vs Pocentaje de valores similares ') + 
+  theme_minimal()
+
+```
+
+
+```{r}
+ggplot(data = data, aes(x = porcentaje.de.valores.similares.entre.2.matrices, y = N.BASES)) + 
+  geom_point(color = 'slateblue', size = 2, alpha = 0.6) +
+  geom_smooth(color = 'red') + 
+  xlab('Pocentaje de valores similares entre Pchic y Rchic ') + 
+  ylab('Numero de bases') +
+  ggtitle('Num.bases vs Pocentaje de valores similares ') + 
+  theme_minimal()
+```
+
+
+
+```{r}
+summary_table <- describe(data)
+
+# Display the resultant table
+print(summary_table)
+```
+
+
+
+## histgrama
+
+```{r}
+A<-ggplot(data,aes(x=Rchic.total.similaridad))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(Rchic.total.similaridad),sd(Rchic.total.similaridad)),size=0.7)+
+labs(title=" Distribucion de valores de similaridad de Rchic ", y="Densidad",x="rchicsimilardiad")
+
+B<-ggplot(data,aes(x=Pchic.total.similaridad))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(Pchic.total.similaridad),sd(Pchic.total.similaridad)),size=0.7)+
+labs(title="Distribucion de valores de similaridad de Pchic", y="Densidad",x="Pchicsimilardiad")
+
+grid.arrange(A,B)
+
+
+```
+
+
+
+
+
+## representacion conjunta
+```{r}
+x1 <- Pchic.total.similaridad
+x2 <- Rchic.total.similaridad
+x <- c(x1, x2)
+Grupo <-c(rep("PCHIC", length(Pchic.total.similaridad)), rep("RCHIC", length(Rchic.total.similaridad)))
+df <- data.frame(x, group = Grupo)
+
+```
+
+
+
+```{r,warning=FALSE}
+ggplot(df)+
+  aes(x=x,fill=Grupo)+
+  geom_density(alpha=0.75)+
+  labs(title="Densidad",x="CANTIDAD DE VALORES SIMILARES EN LAS MATRICES",y="")+
+  guides(colour="none")+
+  theme_minimal()
+```
+
+
+
+```{r,warning=FALSE}
+ggplot(df)+
+  aes(x=x,fill=Grupo)+
+  geom_histogram(aes(y=..density..),bins=50,alpha=0.75,position="identity")+
+  geom_density(aes(linetype=Grupo,colour=Grupo),alpha=0)+
+  labs(title="",x="RepresentaciOn de valores generados por Pchic y Rchic.",y="")+
+  theme_classic()
+```
+
+
+
+## prueba de hipotesis
+
+
+
+
+## HO:u<=0.9
+## H1:U>0.9
+
+
+```{r}
+
+
+
+library(tidyverse)
+t.test(x=porcentaje.de.valores.similares.entre.2.matrices  , alternative = "greater", mu=0.9 , conf.level = 0.95)
+```
+
+
+```{r}
+library(tidyverse)
+t.test(x=porcentaje.nodos.iguales, alternative = "greater", mu=0.9 , conf.level = 0.95)
+
+```
+
+
+
+
+```{r}
+ggplot(data, aes(x=0, y=porcentaje.de.valores.similares.entre.2.matrices))+ geom_boxplot(outlier.colour= "blue")+
+stat_summary(fun.y=mean, geom="point", shape=18,size=3, color="red")
+```
+
+
+```{r}
+resumen_psych <- describe(data)
+
+kable(print(resumen_psych))
+```
+```{r}
+C<-ggplot(data,aes(x=nodosrchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(nodosrchic),sd(nodosrchic)),size=0.7)+
+labs(title=" Distribucion de valores de nodos significativos de Rchic ", y="Densidad",x="Rchic nodos significativos")
+
+D<-ggplot(data,aes(x=nodospchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(nodospchic),sd(nodospchic)),size=0.7)+
+labs(title=" Distribucion de valores de nodos signitivos de Pchic ", y="Densidad",x="Pchic nodos significativos")
+
+grid.arrange(C,D)
+
+```
+
+```{r}
+x1 <- nodospchic
+x2 <- nodosrchic
+x <- c(x1, x2)
+Grupo <-c(rep("NODOS PCHIC", length(nodospchic)), rep("NODOS RCHIC", length(nodosrchic)))
+df <- data.frame(x, group = Grupo)
+```
+
+```{r}
+ggplot(df)+
+  aes(x=x,fill=Grupo)+
+  geom_histogram(aes(y=..density..),bins=50,alpha=0.75,position="identity")+
+  geom_density(aes(linetype=Grupo,colour=Grupo),alpha=0)+
+  labs(title="",x="Representacion de valores (nodos) generados por Pchic y Rchic.",y="")+
+  theme_classic()
+```
+
+
+```{r}
+ggplot(data = data, aes(x = porcentaje.nodos.iguales, y = variables)) + 
+  geom_point(color = 'slateblue', size = 2, alpha = 0.6) +
+  geom_smooth(color = 'red') + 
+  xlab('Pocentaje de nodos iguales') + 
+  ylab('Numero de variables') +
+  ggtitle('Numero de variables vs Pocentaje de nodos iguales') + 
+  theme_minimal()
+
+```
+```{r}
+ggplot(data = data, aes(x = porcentaje.nodos.iguales, y = N.BASES)) + 
+  geom_point(color = 'slateblue', size = 2, alpha = 0.6) +
+  geom_smooth(color = 'red') + 
+  xlab('Pocentaje de nodos iguales') + 
+  ylab('Numero de bases') +
+  ggtitle('Num.bases vs Pocentaje de nodos iguales') + 
+  theme_minimal()
+```
+
+```{r}
+ggplot(data,aes(x=porcentaje.de.valores.similares.entre.2.matrices))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(porcentaje.de.valores.similares.entre.2.matrices),sd(porcentaje.de.valores.similares.entre.2.matrices)),size=0.7)+
+labs(title="Distribucion de los porcentajes de valores similares entre Pchic y Rchic", y=" Numero de bases de datos",x="Porcentajes")
+```
+
+```{r}
+ggplot(data,aes(x=porcentaje.de.no.similaridad))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(porcentaje.de.no.similaridad),sd(porcentaje.de.no.similaridad)),size=0.7)+
+labs(title="Distribucion de  porcentajes de valores no similares entre Pchic y Rchic", y="Numero de bases",x="Porcentajes")
+```
+#dendogrograma
+```{r}
+pairs.panels(data[6:7],gap=0)
+```
+```{r}
+ggplot(data,aes(x=porcentaje.nodos.no.iguales))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(porcentaje.nodos.no.iguales),sd(porcentaje.nodos.no.iguales)),size=0.7)+
+labs(title="Distribucion de los porcentajes de nodos no significativos entre Pchic y Rchic", y=" Numero de bases de datos",x="Porcentajes")
+
+
+```
+
+# DISTRIBUCION
+```{r}
+ggplot(data,aes(x=porcentaje.nodos.iguales))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(porcentaje.nodos.iguales),sd(porcentaje.nodos.iguales)),size=0.7)+
+labs(title="Distribucion porcentajes de valores  nodos significativos 
+     ", y=" Numero de bases de datos",x="Porcentaje de valores similares ")
+```
+```{r}
+ggplot(data,aes(x=dendogramas.r.chic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(dendogramas.r.chic),sd(dendogramas.r.chic)),size=0.7)+
+labs(title=" Histograma de dendrogramas  de Rchic ", y="Densidad",x="Dendrogramas Rchic")
+
+
+
+
+```
+```{r}
+ggplot(data,aes(x=dendrograma.pchic))+
+geom_histogram(bins=10,aes(y = ..density..),fill="gray", color = "black", size=0.1)+
+geom_density(col="blue")+
+stat_function(fun=dnorm,color="red",args = list( mean(dendrograma.pchic),sd(dendrograma.pchic)),size=0.7)+
+labs(title=" Histograma de dendrogramas  de Rchic ", y="Densidad",x="Dendrgramas phic")
+
+```
+
+
